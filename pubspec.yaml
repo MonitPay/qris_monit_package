@@ -1,0 +1,25 @@
+name: qris_monit_package
+description: QRIS Scanner developed by Monit Tech Teams.
+version: 0.0.1
+homepage: https://www.monit.id/
+repository: https://github.com/MonitPay/qris_monit_package
+issue_tracker: https://github.com/MonitPay/qris_monit_package/issues
+documentation: https://github.com/MonitPay/qris_monit_package/blob/master/README.md
+
+environment:
+  sdk: '>=2.18.2 <3.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^0.13.5
+  image_picker: ^0.8.6+2
+  mobile_scanner: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.1
+
+flutter:
