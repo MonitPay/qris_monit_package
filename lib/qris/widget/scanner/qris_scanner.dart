@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
 
+import '../../animation/scanner_animation.dart';
+
 ///The parent widget is [Stack]
 ///Preferably use [Positioned] for positioning the children
 typedef QRISFrontCanvasBuilder = List<Widget> Function(
@@ -15,6 +17,8 @@ typedef QRISOnScanCompleted = Future Function(
 );
 
 class QRISScanner extends StatefulWidget {
+  final Size? animationSize;
+
   final QRISOnScanCompleted onScanCompleted;
 
   final QRISFrontCanvasBuilder? frontCanvasBuilder;
@@ -31,6 +35,7 @@ class QRISScanner extends StatefulWidget {
     this.isFlashButtonEnabled,
     this.isGalleryButtonEnabled,
     this.frontCanvasBuilder,
+    this.animationSize,
     Key? key,
   }) : super(key: key);
 
@@ -38,10 +43,11 @@ class QRISScanner extends StatefulWidget {
   State<QRISScanner> createState() => _QRISScannerState();
 }
 
-class _QRISScannerState extends State<QRISScanner> {
+class _QRISScannerState extends State<QRISScanner>
+    with SingleTickerProviderStateMixin {
   ///instance of [MobileScannerController]
   ///for controlling QR scanner camera
-  QRISController qrisController = QRISController();
+  late QRISController qrisController;
 
   ///instance of [QRIS]
   ///
@@ -49,6 +55,41 @@ class _QRISScannerState extends State<QRISScanner> {
   ///
   /// return parsed qr code data
   QRIS? qrisData;
+
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    qrisController = QRISController();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        animateScanAnimation(true);
+      } else if (status == AnimationStatus.dismissed) {
+        animateScanAnimation(false);
+      }
+    });
+    animateScanAnimation(false);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    qrisController.dispose();
+    super.dispose();
+  }
+
+  void animateScanAnimation(bool reverse) {
+    if (reverse) {
+      _animationController.reverse(from: 1.0);
+    } else {
+      _animationController.forward(from: 0.0);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +132,10 @@ class _QRISScannerState extends State<QRISScanner> {
               );
             }
           },
+        ),
+        ScannerAnimation(
+          animation: _animationController,
+          animationSize: widget.animationSize,
         ),
         if (widget.frontCanvasBuilder != null)
           ...widget.frontCanvasBuilder!(qrisData, qrisController),
