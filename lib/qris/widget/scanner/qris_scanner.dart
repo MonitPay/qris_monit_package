@@ -13,7 +13,8 @@ typedef QRISFrontCanvasBuilder = List<Widget> Function(
 
 typedef QRISOnScanCompleted = Future Function(
   String rawData,
-  QRIS qrisData,
+  QRIS? qrisData,
+  QRISError? qrisError,
 );
 
 class QRISScanner extends StatefulWidget {
@@ -102,16 +103,25 @@ class _QRISScannerState extends State<QRISScanner>
             if (barcodes.barcodes.first.rawValue != null) {
               if (kDebugMode) {
                 print(
-                    'barcodeData.rawValue ===== ${barcodes.barcodes.first.rawValue}');
+                    'Barcode Raw Value ===== ${barcodes.barcodes.first.rawValue}');
               }
               try {
-                qrisData = QRIS(barcodes.barcodes.first.rawValue!);
-                widget.onScanCompleted(
-                  barcodes.barcodes.first.rawValue!,
-                  qrisData!,
-                );
-                setState(() {});
-              } catch (e) {
+                if (barcodes.barcodes.first.rawValue != null) {
+                  List<String> rawQRStrings =
+                      barcodes.barcodes.first.rawValue?.split('|') ?? [];
+                  if (rawQRStrings.first == 'LOGIN') {
+                    widget.onScanCompleted(rawQRStrings.last, null, null);
+                  } else {
+                    qrisData = QRIS(barcodes.barcodes.first.rawValue!);
+                    if (kDebugMode) {
+                      print('QRIS Data Value ===== ${qrisData.toString()}');
+                    }
+                    widget.onScanCompleted(
+                        barcodes.barcodes.first.rawValue!, qrisData, null);
+                    setState(() {});
+                  }
+                }
+              } on QRISError catch (e) {
                 debugPrint(
                   'Failed to scan barcode '
                   '\n\n'
@@ -120,6 +130,9 @@ class _QRISScannerState extends State<QRISScanner>
                   '================================================================================\n'
                   '\n\n',
                 );
+
+                widget.onScanCompleted(
+                    barcodes.barcodes.first.rawValue!, null, e);
               }
             } else {
               debugPrint(
@@ -137,9 +150,11 @@ class _QRISScannerState extends State<QRISScanner>
           animation: _animationController,
           animationSize: widget.animationSize,
         ),
-        if (widget.frontCanvasBuilder != null)
+        if (widget.frontCanvasBuilder != null) ...[
           ...widget.frontCanvasBuilder!(qrisData, qrisController),
-        if (widget.frontCanvasBuilder == null) _defaultFrontCanvasBuilder(),
+        ] else ...[
+          _defaultFrontCanvasBuilder()
+        ],
       ],
     );
   }
@@ -160,14 +175,12 @@ class _QRISScannerState extends State<QRISScanner>
                   icon: ValueListenableBuilder(
                     valueListenable: qrisController.torchState,
                     builder: (context, state, child) {
-                      switch (state) {
-                        case TorchState.off:
-                          return const Icon(Icons.flash_off,
-                              color: Colors.black);
-                        case TorchState.on:
-                          return const Icon(Icons.flash_on,
-                              color: Colors.yellow);
-                      }
+                      return switch (state) {
+                        TorchState.off =>
+                          const Icon(Icons.flash_off, color: Colors.black),
+                        TorchState.on =>
+                          const Icon(Icons.flash_on, color: Colors.yellow),
+                      };
                     },
                   ),
                   iconSize: 24.0,
@@ -176,9 +189,14 @@ class _QRISScannerState extends State<QRISScanner>
               ),
             ),
           ),
-          if ((widget.isFlashButtonEnabled ?? true) &&
-              (widget.isGalleryButtonEnabled ?? true))
-            const SizedBox(width: 16),
+          Builder(builder: (context) {
+            if ((widget.isFlashButtonEnabled ?? true) &&
+                (widget.isGalleryButtonEnabled ?? true)) {
+              return const SizedBox(width: 16);
+            } else {
+              return const SizedBox();
+            }
+          }),
           Offstage(
             offstage: !(widget.isGalleryButtonEnabled ?? true),
             child: ClipRRect(

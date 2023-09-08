@@ -37,7 +37,8 @@ class ScannerAnimation extends AnimatedWidget {
     return Positioned(
       bottom: scorePosition,
       child: SizedBox(
-        height: animationSize?.height ?? MediaQuery.of(context).size.width * .25,
+        height:
+            animationSize?.height ?? MediaQuery.of(context).size.width * .25,
         width: animationSize?.width ?? MediaQuery.of(context).size.width,
         child: ListView.builder(
           itemCount: 100,

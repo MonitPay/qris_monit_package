@@ -5,21 +5,27 @@ homepage: https://www.monit.id/
 repository: https://github.com/MonitPay/qris_monit_package
 issue_tracker: https://github.com/MonitPay/qris_monit_package/issues
 documentation: https://github.com/MonitPay/qris_monit_package/blob/master/README.md
+publish_to: 'none'
 
 environment:
-  sdk: '>=2.18.2 <3.0.0'
-  flutter: ">=1.17.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.5
-  image_picker: ^0.8.6+2
-  mobile_scanner: ^3.0.0
+  crclib: ^3.0.0
+  http: ^1.1.0
+  image_picker: ^1.0.4
+  mobile_scanner: ^3.4.1
+  qris:
+    git:
+      url: https://github.com/dwikyhardi/qris
+      ref: master
+      
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
+  flutter_lints: ^2.0.3
 
 flutter:

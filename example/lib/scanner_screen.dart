@@ -13,10 +13,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: QRISScanner(
-        onScanCompleted: (rawData, qrisData) async {
+        onScanCompleted: (rawData, qrisData, qrisError) async {
           debugPrint('Raw Data === $rawData');
-          debugPrint('Merchant Name === ${qrisData.merchantName}');
-          debugPrint('Merchant City === ${qrisData.merchantCity}');
+          debugPrint('Merchant Name === ${qrisData?.merchantName}');
+          debugPrint('Merchant City === ${qrisData?.merchantCity}');
         },
         errorBuilder: (_, error, __) {
           return Center(
@@ -111,7 +111,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                                   style: const TextStyle(fontSize: 16),
                                 ),
                                 const SizedBox(height: 8),
-                                FutureBuilder<Currency>(
+                                FutureBuilder<Currency?>(
                                   future: qrisData.getTransactionCurrency(),
                                   builder: (_, data) {
                                     return Column(
