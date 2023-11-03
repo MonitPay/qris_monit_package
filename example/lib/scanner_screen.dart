@@ -9,10 +9,19 @@ class ScannerScreen extends StatefulWidget {
 }
 
 class _ScannerScreenState extends State<ScannerScreen> {
+  final QRISController qrisController = QRISController();
+
+  @override
+  void dispose() {
+    qrisController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: QRISScanner(
+        qrisController: qrisController,
         onScanCompleted: (rawData, qrisData, qrisError) async {
           debugPrint('Raw Data === $rawData');
           debugPrint('Merchant Name === ${qrisData?.merchantName}');
@@ -26,7 +35,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
             ),
           );
         },
-        frontCanvasBuilder: (qrisData, qrisController) {
+        frontCanvasBuilder: (qrisData) {
           return [
             Positioned(
               bottom: 0.0,

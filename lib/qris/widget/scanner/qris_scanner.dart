@@ -8,7 +8,6 @@ import '../../animation/scanner_animation.dart';
 ///Preferably use [Positioned] for positioning the children
 typedef QRISFrontCanvasBuilder = List<Widget> Function(
   QRIS? qrisData,
-  QRISController qrisController,
 );
 
 typedef QRISOnScanCompleted = Future Function(
@@ -18,6 +17,10 @@ typedef QRISOnScanCompleted = Future Function(
 );
 
 class QRISScanner extends StatefulWidget {
+  ///instance of [MobileScannerController]
+  ///for controlling QR scanner camera
+  final QRISController qrisController;
+
   final Size? animationSize;
 
   final QRISOnScanCompleted onScanCompleted;
@@ -31,14 +34,15 @@ class QRISScanner extends StatefulWidget {
   final bool? isGalleryButtonEnabled;
 
   const QRISScanner({
+    super.key,
     required this.onScanCompleted,
+    required this.qrisController,
     this.errorBuilder,
     this.isFlashButtonEnabled,
     this.isGalleryButtonEnabled,
     this.frontCanvasBuilder,
     this.animationSize,
-    Key? key,
-  }) : super(key: key);
+  });
 
   @override
   State<QRISScanner> createState() => _QRISScannerState();
@@ -62,7 +66,7 @@ class _QRISScannerState extends State<QRISScanner>
   @override
   void initState() {
     super.initState();
-    qrisController = QRISController();
+    qrisController = widget.qrisController;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -122,14 +126,14 @@ class _QRISScannerState extends State<QRISScanner>
                   }
                 }
               } on QRISError catch (e) {
-                debugPrint(
-                  'Failed to scan barcode '
-                  '\n\n'
-                  '================================================================================\n'
-                  '$e\n'
-                  '================================================================================\n'
-                  '\n\n',
-                );
+                // debugPrint(
+                //   'Failed to scan barcode '
+                //   '\n\n'
+                //   '================================================================================\n'
+                //   '$e\n'
+                //   '================================================================================\n'
+                //   '\n\n',
+                // );
 
                 widget.onScanCompleted(
                     barcodes.barcodes.first.rawValue!, null, e);
@@ -151,7 +155,7 @@ class _QRISScannerState extends State<QRISScanner>
           animationSize: widget.animationSize,
         ),
         if (widget.frontCanvasBuilder != null) ...[
-          ...widget.frontCanvasBuilder!(qrisData, qrisController),
+          ...widget.frontCanvasBuilder!(qrisData),
         ] else ...[
           _defaultFrontCanvasBuilder()
         ],

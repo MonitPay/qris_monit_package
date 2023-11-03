@@ -268,10 +268,10 @@ packages:
     dependency: transitive
     description:
       name: mobile_scanner
-      sha256: "2fbc3914fe625e196c64ea8ffc4084cd36781d2be276d4d5923b11af3b5d44ff"
+      sha256: cf978740676ba5b0c17399baf117984b31190bb7a6eaa43e51229ed46abc42ee
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.1"
+    version: "3.5.2"
   path:
     dependency: transitive
     description:
@@ -291,9 +291,11 @@ packages:
   qris:
     dependency: transitive
     description:
-      path: "../../qris"
-      relative: true
-    source: path
+      path: "."
+      ref: master
+      resolved-ref: "0072960daa055df25b73b83864a0c6d5b905cd12"
+      url: "https://github.com/dwikyhardi/qris"
+    source: git
     version: "0.6.1"
   qris_monit_package:
     dependency: "direct main"

@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 
 class ScannerAnimation extends AnimatedWidget {
   final Size? animationSize;
+
   const ScannerAnimation({
-    Key? key,
+    super.key,
     required Animation<double> animation,
     this.animationSize,
-  }) : super(
-          key: key,
-          listenable: animation,
-        );
+  }) : super(listenable: animation);
 
   @override
   Widget build(BuildContext context) {
