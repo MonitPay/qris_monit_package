@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
@@ -11,7 +14,7 @@ typedef QRISFrontCanvasBuilder = List<Widget> Function(
 );
 
 typedef QRISOnScanCompleted = Future Function(
-  String rawData,
+  String? rawData,
   QRIS? qrisData,
   QRISError? qrisError,
 );
@@ -98,58 +101,52 @@ class _QRISScannerState extends State<QRISScanner>
 
   @override
   Widget build(BuildContext context) {
+    return MobileScanner(
+      controller: qrisController,
+      errorBuilder: widget.errorBuilder,
+      overlay: _scannerOverlay(),
+      onDetect: (BarcodeCapture barcodes) {
+        if (barcodes.barcodes.first.rawValue != null) {
+          if (kDebugMode) {
+            print(
+                'Barcode Raw Value ===== ${barcodes.barcodes.first.rawValue}');
+          }
+          try {
+            qrisData = QRIS(barcodes.barcodes.first.rawValue ?? '');
+            widget.onScanCompleted(
+                barcodes.barcodes.first.rawValue, qrisData, null);
+            setState(() {});
+          } on QRISError catch (e) {
+            // debugPrint(
+            //   'Failed to scan barcode '
+            //   '\n\n'
+            //   '================================================================================\n'
+            //   '$e\n'
+            //   '================================================================================\n'
+            //   '\n\n',
+            // );
+
+            widget.onScanCompleted(barcodes.barcodes.first.rawValue, null, e);
+          }
+        } else {
+          widget.onScanCompleted(null, null,
+              QRISError('not_a_barcode', message: 'Unable to read QR code'));
+          debugPrint(
+            'Failed to scan barcode '
+            '\n\n'
+            '================================================================================\n'
+            'Unable to read QR code'
+            '================================================================================\n'
+            '\n\n',
+          );
+        }
+      },
+    );
+  }
+
+  Stack _scannerOverlay() {
     return Stack(
       children: [
-        MobileScanner(
-          controller: qrisController,
-          errorBuilder: widget.errorBuilder,
-          onDetect: (BarcodeCapture barcodes) {
-            if (barcodes.barcodes.first.rawValue != null) {
-              if (kDebugMode) {
-                print(
-                    'Barcode Raw Value ===== ${barcodes.barcodes.first.rawValue}');
-              }
-              try {
-                if (barcodes.barcodes.first.rawValue != null) {
-                  List<String> rawQRStrings =
-                      barcodes.barcodes.first.rawValue?.split('|') ?? [];
-                  if (rawQRStrings.first == 'LOGIN') {
-                    widget.onScanCompleted(rawQRStrings.last, null, null);
-                  } else {
-                    qrisData = QRIS(barcodes.barcodes.first.rawValue!);
-                    if (kDebugMode) {
-                      print('QRIS Data Value ===== ${qrisData.toString()}');
-                    }
-                    widget.onScanCompleted(
-                        barcodes.barcodes.first.rawValue!, qrisData, null);
-                    setState(() {});
-                  }
-                }
-              } on QRISError catch (e) {
-                // debugPrint(
-                //   'Failed to scan barcode '
-                //   '\n\n'
-                //   '================================================================================\n'
-                //   '$e\n'
-                //   '================================================================================\n'
-                //   '\n\n',
-                // );
-
-                widget.onScanCompleted(
-                    barcodes.barcodes.first.rawValue!, null, e);
-              }
-            } else {
-              debugPrint(
-                'Failed to scan barcode '
-                '\n\n'
-                '================================================================================\n'
-                'Unable to read QR code'
-                '================================================================================\n'
-                '\n\n',
-              );
-            }
-          },
-        ),
         ScannerAnimation(
           animation: _animationController,
           animationSize: widget.animationSize,
@@ -165,61 +162,102 @@ class _QRISScannerState extends State<QRISScanner>
 
   Widget _defaultFrontCanvasBuilder() {
     return Positioned(
-      top: AppBar().preferredSize.height - 16,
-      right: 16.0,
-      child: Row(
-        children: [
-          Offstage(
-            offstage: !(widget.isFlashButtonEnabled ?? true),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(36)),
-              child: Container(
-                color: Colors.white,
-                child: IconButton(
-                  icon: ValueListenableBuilder(
-                    valueListenable: qrisController.torchState,
-                    builder: (context, state, child) {
-                      return switch (state) {
-                        TorchState.off =>
-                          const Icon(Icons.flash_off, color: Colors.black),
-                        TorchState.on =>
-                          const Icon(Icons.flash_on, color: Colors.yellow),
-                      };
-                    },
+      left: 0.0,
+      right: 0.0,
+      bottom: 0.0,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Offstage(
+                offstage: !(widget.isFlashButtonEnabled ?? true),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(36)),
+                  child: Container(
+                    color: Colors.white,
+                    child: IconButton(
+                      icon: ValueListenableBuilder(
+                        valueListenable: qrisController.torchState,
+                        builder: (context, state, child) {
+                          return switch (state) {
+                            TorchState.off =>
+                              const Icon(Icons.flash_off, color: Colors.black),
+                            TorchState.on =>
+                              const Icon(Icons.flash_on, color: Colors.yellow),
+                          };
+                        },
+                      ),
+                      iconSize: 24.0,
+                      onPressed: () => qrisController.toggleTorch(),
+                    ),
                   ),
-                  iconSize: 24.0,
-                  onPressed: () => qrisController.toggleTorch(),
                 ),
               ),
-            ),
-          ),
-          Builder(builder: (context) {
-            if ((widget.isFlashButtonEnabled ?? true) &&
-                (widget.isGalleryButtonEnabled ?? true)) {
-              return const SizedBox(width: 16);
-            } else {
-              return const SizedBox();
-            }
-          }),
-          Offstage(
-            offstage: !(widget.isGalleryButtonEnabled ?? true),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(36)),
-              child: Container(
-                color: Colors.white,
-                child: IconButton(
-                  icon: const Icon(Icons.add_photo_alternate_outlined,
-                      color: Colors.black),
-                  iconSize: 24.0,
-                  onPressed: () {
-                    qrisController.openGallery();
-                  },
+              Builder(builder: (context) {
+                if ((widget.isFlashButtonEnabled ?? true) &&
+                    (widget.isGalleryButtonEnabled ?? true)) {
+                  return const SizedBox(width: 16);
+                } else {
+                  return const SizedBox();
+                }
+              }),
+              Offstage(
+                offstage: !(widget.isGalleryButtonEnabled ?? true),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(36)),
+                  child: Container(
+                    color: Colors.white,
+                    child: IconButton(
+                      icon: const Icon(Icons.add_photo_alternate_outlined,
+                          color: Colors.black),
+                      iconSize: 24.0,
+                      onPressed: () {
+                        qrisController.openGallery().then(
+                          (value) {
+                            if (!value.isValidQr) {
+                              _showInvalidQRDialog();
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
+    );
+  }
+
+  void _showInvalidQRDialog() {
+    showAdaptiveDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog.adaptive(
+          title: const Text('Unrecognized QR code'),
+          content: const Text('Please scan the code again'),
+          actions: [
+            if (Platform.isIOS)
+              CupertinoDialogAction(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Close'),
+              ),
+            if (Platform.isAndroid)
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Close'),
+              )
+          ],
+        );
+      },
     );
   }
 }
