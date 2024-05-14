@@ -104,7 +104,9 @@ class _QRISScannerState extends State<QRISScanner>
     return MobileScanner(
       controller: qrisController,
       errorBuilder: widget.errorBuilder,
-      overlay: _scannerOverlay(),
+      overlayBuilder: (context, controller) {
+        return _scannerOverlay();
+      },
       onDetect: (BarcodeCapture barcodes) {
         if (barcodes.barcodes.first.rawValue != null) {
           if (kDebugMode) {
@@ -179,13 +181,17 @@ class _QRISScannerState extends State<QRISScanner>
                     color: Colors.white,
                     child: IconButton(
                       icon: ValueListenableBuilder(
-                        valueListenable: qrisController.torchState,
+                        valueListenable: qrisController,
                         builder: (context, state, child) {
-                          return switch (state) {
+                          return switch (state.torchState) {
                             TorchState.off =>
                               const Icon(Icons.flash_off, color: Colors.black),
                             TorchState.on =>
                               const Icon(Icons.flash_on, color: Colors.yellow),
+                            TorchState.auto =>
+                              const Icon(Icons.flash_off, color: Colors.black),
+                            TorchState.unavailable =>
+                              const Icon(Icons.flash_off, color: Colors.black),
                           };
                         },
                       ),
@@ -216,7 +222,7 @@ class _QRISScannerState extends State<QRISScanner>
                       onPressed: () {
                         qrisController.openGallery().then(
                           (value) {
-                            if (!value.isValidQr) {
+                            if (value.barcodeCapture == null) {
                               _showInvalidQRDialog();
                             }
                           },

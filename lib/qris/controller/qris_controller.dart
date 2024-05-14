@@ -1,7 +1,6 @@
 import 'dart:io';
 
-import 'package:image_picker/image_picker.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:qris_monit_package/qris_monit_package.dart';
 
 class QRISController extends MobileScannerController {
   QRISController({
@@ -41,19 +40,20 @@ class QRISController extends MobileScannerController {
 
   ///Open Gallery using [ImagePicker] lib
   ///use for scanning QR from gallery
-  Future<({bool isValidQr, File? qrImageFile})> openGallery() async {
+  Future<({BarcodeCapture? barcodeCapture, File? qrImageFile})>
+      openGallery() async {
     final ImagePicker picker = ImagePicker();
     return await picker
         .pickImage(source: ImageSource.gallery)
         .then((imageFile) async {
       if (imageFile != null) {
         return (
-          isValidQr: await analyzeImage(imageFile.path),
+          barcodeCapture: await analyzeImage(imageFile.path),
           qrImageFile: File(imageFile.path)
         );
       }
 
-      return (isValidQr: false, qrImageFile: null);
+      return (barcodeCapture: null, qrImageFile: null);
     });
   }
 }
