@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -222,7 +223,7 @@ class _QRISScannerState extends State<QRISScanner>
                       onPressed: () {
                         qrisController.openGallery().then(
                           (value) {
-                            if (value.barcodeCapture == null) {
+                            if (value == null) {
                               _showInvalidQRDialog();
                             }
                           },

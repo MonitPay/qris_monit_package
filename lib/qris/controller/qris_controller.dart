@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:flutter/material.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
 
 class QRISController extends MobileScannerController {
@@ -18,7 +17,9 @@ class QRISController extends MobileScannerController {
     super.formats,
 
     /// Automatically start the mobileScanner on initialization.
-    super.autoStart,
+    /// If set to false, you need to call [start] manually.
+    /// Default: true
+    super.autoStart = true,
 
     /// Sets the timeout of scanner.
     /// The timeout is set in miliseconds.
@@ -40,20 +41,29 @@ class QRISController extends MobileScannerController {
 
   ///Open Gallery using [ImagePicker] lib
   ///use for scanning QR from gallery
-  Future<({BarcodeCapture? barcodeCapture, File? qrImageFile})>
-      openGallery() async {
-    final ImagePicker picker = ImagePicker();
-    return await picker
+  Future<BarcodeCapture?> openGallery() async {
+    return ImagePicker()
         .pickImage(source: ImageSource.gallery)
         .then((imageFile) async {
       if (imageFile != null) {
-        return (
-          barcodeCapture: await analyzeImage(imageFile.path),
-          qrImageFile: File(imageFile.path)
-        );
+        BarcodeCapture? barcodeCapture = await analyzeImage(imageFile.path);
+        debugPrint('barcodeCapture ===== ${barcodeCapture?.barcodes.first.rawValue}');
+        return barcodeCapture;
       }
-
-      return (barcodeCapture: null, qrImageFile: null);
+      return null;
     });
+    // final ImagePicker picker = ImagePicker();
+    // return await picker
+    //     .pickImage(source: ImageSource.gallery)
+    //     .then((imageFile) async {
+    //   if (imageFile != null) {
+    //     return (
+    //       barcodeCapture: await analyzeImage(imageFile.path),
+    //       qrImageFile: File(imageFile.path)
+    //     );
+    //   }
+    //
+    //   return (barcodeCapture: null, qrImageFile: null);
+    // });
   }
 }
