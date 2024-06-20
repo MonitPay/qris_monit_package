@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
 
@@ -41,29 +43,44 @@ class QRISController extends MobileScannerController {
 
   ///Open Gallery using [ImagePicker] lib
   ///use for scanning QR from gallery
-  Future<BarcodeCapture?> openGallery() async {
-    return ImagePicker()
-        .pickImage(source: ImageSource.gallery)
+  Future<void> scanFromGallery() async {
+    ImagePicker()
+        .pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 100,
+    )
         .then((imageFile) async {
-      if (imageFile != null) {
-        BarcodeCapture? barcodeCapture = await analyzeImage(imageFile.path);
-        debugPrint('barcodeCapture ===== ${barcodeCapture?.barcodes.first.rawValue}');
-        return barcodeCapture;
-      }
-      return null;
+      if (imageFile == null) return;
+      await _processImage(imageFile.path);
     });
-    // final ImagePicker picker = ImagePicker();
-    // return await picker
-    //     .pickImage(source: ImageSource.gallery)
-    //     .then((imageFile) async {
-    //   if (imageFile != null) {
-    //     return (
-    //       barcodeCapture: await analyzeImage(imageFile.path),
-    //       qrImageFile: File(imageFile.path)
-    //     );
-    //   }
-    //
-    //   return (barcodeCapture: null, qrImageFile: null);
-    // });
+  }
+
+  /// Processes an image to detect any barcodes present.
+  ///
+  /// This method takes a file path to an image, analyzes the image to detect
+  /// any barcodes, and then adds the detected barcodes to the `barcodes` stream.
+  ///
+  /// The method uses the `analyzeImage` function to perform the barcode detection.
+  /// The detected barcodes are then printed to the debug console and added to the
+  /// `barcodes` stream by calling the `addBarcode` method.
+  ///
+  /// The `addBarcode` method is defined in the `MobileScannerController` superclass
+  /// and allows subclasses to add data to the `barcodes` stream.
+  ///
+  /// @param filePath The file path to the image to be processed.
+  /// @return A `Future` that completes when the image has been processed and the
+  ///         detected barcodes have been added to the `barcodes` stream.
+  Future<void> _processImage(String filePath) async {
+    // Analyze the image to detect any barcodes.
+    BarcodeCapture? barcodeCapture = await analyzeImage(filePath);
+
+    // Print the detected barcodes to the debug console.
+    debugPrint(
+        'barcodeCapture ===== ${barcodeCapture?.barcodes.first.rawValue}');
+    debugPrint('barcodeCapture ===== ${barcodeCapture?.barcodes.first.type}');
+    debugPrint('barcodeCapture ===== ${barcodeCapture?.barcodes.first.format}');
+
+    // Add the detected barcodes to the `barcodes` stream.
+    addBarcode(barcodeCapture);
   }
 }

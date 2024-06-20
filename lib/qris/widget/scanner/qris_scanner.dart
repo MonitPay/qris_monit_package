@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
@@ -83,13 +81,20 @@ class _QRISScannerState extends State<QRISScanner>
       }
     });
     animateScanAnimation(false);
+
+    // Finally, start the scanner itself.
+    unawaited(qrisController.start());
   }
 
   @override
   void dispose() {
+    // Dispose the animation controller when the widget is disposed.
     _animationController.dispose();
-    qrisController.dispose();
+
     super.dispose();
+
+    // Dispose the controller when the widget is disposed.
+    qrisController.dispose();
   }
 
   void animateScanAnimation(bool reverse) {
@@ -221,13 +226,7 @@ class _QRISScannerState extends State<QRISScanner>
                           color: Colors.black),
                       iconSize: 24.0,
                       onPressed: () {
-                        qrisController.openGallery().then(
-                          (value) {
-                            if (value == null) {
-                              _showInvalidQRDialog();
-                            }
-                          },
-                        );
+                        qrisController.scanFromGallery();
                       },
                     ),
                   ),
@@ -237,34 +236,6 @@ class _QRISScannerState extends State<QRISScanner>
           ),
         ),
       ),
-    );
-  }
-
-  void _showInvalidQRDialog() {
-    showAdaptiveDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog.adaptive(
-          title: const Text('Unrecognized QR code'),
-          content: const Text('Please scan the code again'),
-          actions: [
-            if (Platform.isIOS)
-              CupertinoDialogAction(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                },
-                child: const Text('Close'),
-              ),
-            if (Platform.isAndroid)
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                },
-                child: const Text('Close'),
-              )
-          ],
-        );
-      },
     );
   }
 }

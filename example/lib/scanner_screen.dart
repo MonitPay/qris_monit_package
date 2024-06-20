@@ -1,10 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
 
 class ScannerScreen extends StatefulWidget {
-  const ScannerScreen({Key? key}) : super(key: key);
+  const ScannerScreen({super.key});
 
   @override
   State<ScannerScreen> createState() => _ScannerScreenState();
@@ -83,7 +81,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                         ),
                         IconButton(
                           onPressed: () {
-                            qrisController.openGallery();
+                            qrisController.scanFromGallery();
                           },
                           icon: const Icon(Icons.add_photo_alternate_outlined),
                         ),
@@ -124,34 +122,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
                                   style: const TextStyle(fontSize: 16),
                                 ),
                                 const SizedBox(height: 8),
-                                FutureBuilder<Currency?>(
-                                  future: qrisData.getTransactionCurrency(),
-                                  builder: (_, data) {
-                                    return Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Transaction Currency: ${data.data?.currency}',
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'Transaction Currency Name: ${data.data?.name}',
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'Transaction Currency Symbol: ${data.data?.symbol}',
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                        const SizedBox(height: 8),
-                                      ],
-                                    );
-                                  },
-                                ),
                               ],
                             ),
                           ],
