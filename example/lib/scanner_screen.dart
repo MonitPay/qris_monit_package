@@ -23,9 +23,35 @@ class _ScannerScreenState extends State<ScannerScreen> {
       body: QRISScanner(
         qrisController: qrisController,
         onScanCompleted: (rawData, qrisData, qrisError) async {
-          debugPrint('Raw Data === $rawData');
-          debugPrint('Merchant Name === ${qrisData?.merchantName}');
-          debugPrint('Merchant City === ${qrisData?.merchantCity}');
+          qrisController.stop();
+          showAdaptiveDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (dialogContext) {
+              return AlertDialog.adaptive(
+                title: const Text('QRIS Result'),
+                content: Column(
+                  children: [
+                    Text('Raw Data: ${rawData ?? 'No Data'}'),
+                    Text('Merchant Name: ${qrisData?.merchantName}'),
+                    Text('Merchant City: ${qrisData?.merchantCity}'),
+                    Text('Transaction Amount: ${qrisData?.transactionAmount}'),
+                    Text(
+                        'Transaction Currency: ${qrisData?.transactionCurrency}'),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                      qrisController.stop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
         },
         errorBuilder: (_, error, __) {
           return Center(
@@ -34,107 +60,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
               child: Text('${error.errorDetails?.message}'),
             ),
           );
-        },
-        frontCanvasBuilder: (qrisData) {
-          return [
-            Positioned(
-              bottom: 0.0,
-              left: 0.0,
-              right: 0.0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            qrisController.toggleTorch();
-                          },
-                          icon: ValueListenableBuilder(
-                              valueListenable: qrisController,
-                              builder: (context, state, child) {
-                                switch (state.torchState) {
-                                  case TorchState.off:
-                                    return const Icon(Icons.flash_off);
-                                  case TorchState.on:
-                                    return const Icon(Icons.flash_on);
-                                  default:
-                                    return const Icon(Icons.flash_off);
-                                }
-                              }),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            qrisController.scanFromGallery();
-                          },
-                          icon: const Icon(Icons.add_photo_alternate_outlined),
-                        ),
-                      ],
-                    ),
-                    Builder(builder: (context) {
-                      if (qrisData != null) {
-                        return ExpansionTile(
-                          title: const Text('Result'),
-                          children: [
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'QRIS Result',
-                                  style: TextStyle(fontSize: 24),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Merchant Name: ${qrisData.merchantName}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Merchant City: ${qrisData.merchantCity}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Transaction Amount: ${qrisData.transactionAmount}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Transaction Currency: ${qrisData.transactionCurrency}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 8),
-                              ],
-                            ),
-                          ],
-                        );
-                      } else {
-                        return const SizedBox();
-                      }
-                    }),
-                  ],
-                ),
-              ),
-            ),
-          ];
         },
       ),
     );

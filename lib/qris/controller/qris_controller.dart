@@ -90,7 +90,7 @@ class QRISController extends MobileScannerController {
     debugPrint('barcodeCapture ===== ${barcodeCapture?.barcodes.first.format}');
 
     // Add the detected barcodes to the `barcodes` stream.
-    if (barcodeCapture != null) addBarcode(barcodeCapture);
+    addBarcode(barcodeCapture);
 
     return barcodeCapture;
   }

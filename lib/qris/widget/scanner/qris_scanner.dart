@@ -4,8 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
 
-import '../../animation/scanner_animation.dart';
-
 ///The parent widget is [Stack]
 ///Preferably use [Positioned] for positioning the children
 typedef QRISFrontCanvasBuilder = List<Widget> Function(
@@ -54,7 +52,7 @@ class _QRISScannerState extends State<QRISScanner>
     with SingleTickerProviderStateMixin {
   ///instance of [MobileScannerController]
   ///for controlling QR scanner camera
-  late QRISController qrisController;
+  late QRISController qrisController = widget.qrisController;
 
   ///instance of [QRIS]
   ///
@@ -68,7 +66,6 @@ class _QRISScannerState extends State<QRISScanner>
   @override
   void initState() {
     super.initState();
-    qrisController = widget.qrisController;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -82,8 +79,8 @@ class _QRISScannerState extends State<QRISScanner>
     });
     animateScanAnimation(false);
 
-    // Finally, start the scanner itself.
-    unawaited(qrisController.start());
+    // // Finally, start the scanner itself.
+    // unawaited(qrisController.start());
   }
 
   @override
@@ -110,9 +107,15 @@ class _QRISScannerState extends State<QRISScanner>
     return MobileScanner(
       controller: qrisController,
       errorBuilder: widget.errorBuilder,
-      overlayBuilder: (context, controller) {
-        return _scannerOverlay();
-      },
+      overlayBuilder: (_, __) => ScannerOverlay(
+        qrisController: qrisController,
+        frontCanvasBuilder: widget.frontCanvasBuilder,
+        isFlashButtonEnabled: widget.isFlashButtonEnabled,
+        isGalleryButtonEnabled: widget.isGalleryButtonEnabled,
+        animationSize: widget.animationSize,
+        qrisData: qrisData,
+        animationController: _animationController,
+      ),
       onDetect: (BarcodeCapture barcodes) {
         if (barcodes.barcodes.first.rawValue != null) {
           if (kDebugMode) {
@@ -125,15 +128,6 @@ class _QRISScannerState extends State<QRISScanner>
                 barcodes.barcodes.first.rawValue, qrisData, null);
             setState(() {});
           } on QRISError catch (e) {
-            // debugPrint(
-            //   'Failed to scan barcode '
-            //   '\n\n'
-            //   '================================================================================\n'
-            //   '$e\n'
-            //   '================================================================================\n'
-            //   '\n\n',
-            // );
-
             widget.onScanCompleted(barcodes.barcodes.first.rawValue, null, e);
           }
         } else {
@@ -149,93 +143,6 @@ class _QRISScannerState extends State<QRISScanner>
           );
         }
       },
-    );
-  }
-
-  Stack _scannerOverlay() {
-    return Stack(
-      children: [
-        ScannerAnimation(
-          animation: _animationController,
-          animationSize: widget.animationSize,
-        ),
-        if (widget.frontCanvasBuilder != null) ...[
-          ...widget.frontCanvasBuilder!(qrisData),
-        ] else ...[
-          _defaultFrontCanvasBuilder()
-        ],
-      ],
-    );
-  }
-
-  Widget _defaultFrontCanvasBuilder() {
-    return Positioned(
-      left: 0.0,
-      right: 0.0,
-      bottom: 0.0,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Offstage(
-                offstage: !(widget.isFlashButtonEnabled ?? true),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(36)),
-                  child: Container(
-                    color: Colors.white,
-                    child: IconButton(
-                      icon: ValueListenableBuilder(
-                        valueListenable: qrisController,
-                        builder: (context, state, child) {
-                          return switch (state.torchState) {
-                            TorchState.off =>
-                              const Icon(Icons.flash_off, color: Colors.black),
-                            TorchState.on =>
-                              const Icon(Icons.flash_on, color: Colors.yellow),
-                            TorchState.auto =>
-                              const Icon(Icons.flash_off, color: Colors.black),
-                            TorchState.unavailable =>
-                              const Icon(Icons.flash_off, color: Colors.black),
-                          };
-                        },
-                      ),
-                      iconSize: 24.0,
-                      onPressed: () => qrisController.toggleTorch(),
-                    ),
-                  ),
-                ),
-              ),
-              Builder(builder: (context) {
-                if ((widget.isFlashButtonEnabled ?? true) &&
-                    (widget.isGalleryButtonEnabled ?? true)) {
-                  return const SizedBox(width: 16);
-                } else {
-                  return const SizedBox();
-                }
-              }),
-              Offstage(
-                offstage: !(widget.isGalleryButtonEnabled ?? true),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(36)),
-                  child: Container(
-                    color: Colors.white,
-                    child: IconButton(
-                      icon: const Icon(Icons.add_photo_alternate_outlined,
-                          color: Colors.black),
-                      iconSize: 24.0,
-                      onPressed: () {
-                        qrisController.scanFromGallery();
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
