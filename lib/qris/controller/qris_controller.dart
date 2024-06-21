@@ -41,17 +41,26 @@ class QRISController extends MobileScannerController {
     super.torchEnabled,
   });
 
-  ///Open Gallery using [ImagePicker] lib
-  ///use for scanning QR from gallery
-  Future<void> scanFromGallery() async {
-    ImagePicker()
+  /// Initiates a process to scan a barcode from an image selected from the gallery.
+  ///
+  /// This method uses the `ImagePicker` to allow the user to select an image from the gallery.
+  /// The selected image is then processed to detect any barcodes present.
+  ///
+  /// The method returns a `Future` that completes with a `BarcodeCapture` object representing
+  /// the detected barcodes. If no image is selected or no barcodes are detected, the method
+  /// returns `null`.
+  ///
+  /// @return A `Future` that completes with a `BarcodeCapture` object representing the detected
+  ///         barcodes, or `null` if no image is selected or no barcodes are detected.
+  Future<BarcodeCapture?> scanFromGallery() async {
+    return ImagePicker()
         .pickImage(
       source: ImageSource.gallery,
       imageQuality: 100,
     )
         .then((imageFile) async {
-      if (imageFile == null) return;
-      await _processImage(imageFile.path);
+      if (imageFile == null) return null;
+      return await _processImage(imageFile.path);
     });
   }
 
@@ -70,7 +79,7 @@ class QRISController extends MobileScannerController {
   /// @param filePath The file path to the image to be processed.
   /// @return A `Future` that completes when the image has been processed and the
   ///         detected barcodes have been added to the `barcodes` stream.
-  Future<void> _processImage(String filePath) async {
+  Future<BarcodeCapture?> _processImage(String filePath) async {
     // Analyze the image to detect any barcodes.
     BarcodeCapture? barcodeCapture = await analyzeImage(filePath);
 
@@ -81,6 +90,8 @@ class QRISController extends MobileScannerController {
     debugPrint('barcodeCapture ===== ${barcodeCapture?.barcodes.first.format}');
 
     // Add the detected barcodes to the `barcodes` stream.
-    addBarcode(barcodeCapture);
+    if (barcodeCapture != null) addBarcode(barcodeCapture);
+
+    return barcodeCapture;
   }
 }
