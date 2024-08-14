@@ -8,12 +8,11 @@ documentation: https://github.com/MonitPay/qris_monit_package/blob/master/README
 publish_to: 'none'
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.4.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.2.1
   image_picker: ^1.1.2
   qris: ^0.7.1
   mobile_scanner:
