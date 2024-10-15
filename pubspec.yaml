@@ -18,12 +18,10 @@ dependencies:
   mobile_scanner:
     git:
       url: https://github.com/dwikyhardi/mobile_scanner
-      ref: master
+      ref: improve
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
-
-flutter:
+  flutter_lints: ^5.0.0

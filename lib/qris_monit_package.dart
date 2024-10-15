@@ -1,5 +1,3 @@
-library qris_monit_package;
-
 export 'qris/controller/qris_controller.dart';
 
 export 'package:qris/qris.dart';
