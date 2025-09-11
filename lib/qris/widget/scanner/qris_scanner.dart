@@ -1,14 +1,11 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
 
 ///The parent widget is [Stack]
 ///Preferably use [Positioned] for positioning the children
-typedef QRISFrontCanvasBuilder = List<Widget> Function(
-  QRIS? qrisData,
-);
+typedef QRISFrontCanvasBuilder = List<Widget> Function(QRIS? qrisData);
 
 typedef QRISOnScanCompleted = Future Function(
   String? rawData,
@@ -17,6 +14,17 @@ typedef QRISOnScanCompleted = Future Function(
 );
 
 class QRISScanner extends StatefulWidget {
+  const QRISScanner({
+    required this.onScanCompleted,
+    required this.qrisController,
+    this.errorBuilder,
+    this.isFlashButtonEnabled,
+    this.isGalleryButtonEnabled,
+    this.frontCanvasBuilder,
+    this.animationSize,
+    super.key,
+  });
+
   ///instance of [MobileScannerController]
   ///for controlling QR scanner camera
   final QRISController qrisController;
@@ -27,22 +35,11 @@ class QRISScanner extends StatefulWidget {
 
   final QRISFrontCanvasBuilder? frontCanvasBuilder;
 
-  final MobileScannerErrorBuilder? errorBuilder;
+  final Widget Function(BuildContext, MobileScannerException)? errorBuilder;
 
   final bool? isFlashButtonEnabled;
 
   final bool? isGalleryButtonEnabled;
-
-  const QRISScanner({
-    super.key,
-    required this.onScanCompleted,
-    required this.qrisController,
-    this.errorBuilder,
-    this.isFlashButtonEnabled,
-    this.isGalleryButtonEnabled,
-    this.frontCanvasBuilder,
-    this.animationSize,
-  });
 
   @override
   State<QRISScanner> createState() => _QRISScannerState();
@@ -87,11 +84,10 @@ class _QRISScannerState extends State<QRISScanner>
   void dispose() {
     // Dispose the animation controller when the widget is disposed.
     _animationController.dispose();
-
-    super.dispose();
-
     // Dispose the controller when the widget is disposed.
     qrisController.dispose();
+
+    super.dispose();
   }
 
   void animateScanAnimation(bool reverse) {
@@ -106,7 +102,16 @@ class _QRISScannerState extends State<QRISScanner>
   Widget build(BuildContext context) {
     return MobileScanner(
       controller: qrisController,
-      errorBuilder: widget.errorBuilder,
+      errorBuilder: (ctx, error) {
+        return widget.errorBuilder != null
+            ? widget.errorBuilder!(ctx, error)
+            : Center(
+                child: Container(
+                  color: Colors.white,
+                  child: Text(error.errorCode.message),
+                ),
+              );
+      },
       overlayBuilder: (_, __) => ScannerOverlay(
         qrisController: qrisController,
         frontCanvasBuilder: widget.frontCanvasBuilder,
@@ -116,30 +121,46 @@ class _QRISScannerState extends State<QRISScanner>
         qrisData: qrisData,
         animationController: _animationController,
       ),
+      onDetectError: (error, stackTrace) {
+        widget.onScanCompleted(
+          null,
+          null,
+          QRISError(
+            'not_a_barcode',
+            message: 'Unable to read QR code: $error',
+          ),
+        );
+      },
       onDetect: (BarcodeCapture barcodes) {
-        if (barcodes.barcodes.first.rawValue != null) {
-          if (kDebugMode) {
-            print(
-                'Barcode Raw Value ===== ${barcodes.barcodes.first.rawValue}');
-          }
-          try {
-            qrisData = QRIS(barcodes.barcodes.first.rawValue ?? '');
+        if (barcodes.barcodes.isNotEmpty) {
+          if (barcodes.barcodes.first.rawValue != null) {
+            debugPrint(
+              'Barcode Raw Value ===== ${barcodes.barcodes.first.rawValue}',
+            );
+
+            try {
+              qrisData = QRIS(barcodes.barcodes.first.rawValue ?? '');
+              widget.onScanCompleted(
+                barcodes.barcodes.first.rawValue,
+                qrisData,
+                null,
+              );
+              setState(() {});
+            } on QRISError catch (e) {
+              widget.onScanCompleted(barcodes.barcodes.first.rawValue, null, e);
+            }
+          } else {
             widget.onScanCompleted(
-                barcodes.barcodes.first.rawValue, qrisData, null);
-            setState(() {});
-          } on QRISError catch (e) {
-            widget.onScanCompleted(barcodes.barcodes.first.rawValue, null, e);
+              null,
+              null,
+              QRISError('not_a_barcode', message: 'Unable to read QR code'),
+            );
           }
         } else {
-          widget.onScanCompleted(null, null,
-              QRISError('not_a_barcode', message: 'Unable to read QR code'));
-          debugPrint(
-            'Failed to scan barcode '
-            '\n\n'
-            '================================================================================\n'
-            'Unable to read QR code'
-            '================================================================================\n'
-            '\n\n',
+          widget.onScanCompleted(
+            null,
+            null,
+            QRISError('not_a_barcode', message: 'Unable to read QR code'),
           );
         }
       },

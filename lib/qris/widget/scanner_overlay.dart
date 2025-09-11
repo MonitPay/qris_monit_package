@@ -4,14 +4,14 @@ import 'package:qris_monit_package/qris_monit_package.dart';
 
 class ScannerOverlay extends StatelessWidget {
   const ScannerOverlay({
-    super.key,
     required this.qrisController,
+    required this.qrisData,
+    required this.animationController,
     this.frontCanvasBuilder,
     this.isFlashButtonEnabled,
     this.isGalleryButtonEnabled,
     this.animationSize,
-    required this.qrisData,
-    required this.animationController,
+    super.key,
   });
 
   final QRISController qrisController;
@@ -30,11 +30,10 @@ class ScannerOverlay extends StatelessWidget {
           animation: animationController,
           animationSize: animationSize,
         ),
-        if (frontCanvasBuilder != null) ...[
-          ...frontCanvasBuilder!(qrisData),
-        ] else ...[
-          _defaultFrontCanvasBuilder()
-        ],
+        if (frontCanvasBuilder != null)
+          ...frontCanvasBuilder!(qrisData)
+        else
+          _defaultFrontCanvasBuilder(),
       ],
     );
   }
@@ -73,19 +72,21 @@ class ScannerOverlay extends StatelessWidget {
                         },
                       ),
                       iconSize: 24.0,
-                      onPressed: () => qrisController.toggleTorch(),
+                      onPressed: qrisController.toggleTorch,
                     ),
                   ),
                 ),
               ),
-              Builder(builder: (context) {
-                if ((isFlashButtonEnabled ?? true) &&
-                    (isGalleryButtonEnabled ?? true)) {
-                  return const SizedBox(width: 16);
-                } else {
-                  return const SizedBox();
-                }
-              }),
+              Builder(
+                builder: (context) {
+                  if ((isFlashButtonEnabled ?? true) &&
+                      (isGalleryButtonEnabled ?? true)) {
+                    return const SizedBox(width: 16);
+                  } else {
+                    return const SizedBox();
+                  }
+                },
+              ),
               Offstage(
                 offstage: !(isGalleryButtonEnabled ?? true),
                 child: ClipRRect(
@@ -93,12 +94,12 @@ class ScannerOverlay extends StatelessWidget {
                   child: Container(
                     color: Colors.white,
                     child: IconButton(
-                      icon: const Icon(Icons.add_photo_alternate_outlined,
-                          color: Colors.black),
+                      icon: const Icon(
+                        Icons.add_photo_alternate_outlined,
+                        color: Colors.black,
+                      ),
                       iconSize: 24.0,
-                      onPressed: () {
-                        qrisController.scanFromGallery();
-                      },
+                      onPressed: qrisController.scanFromGallery,
                     ),
                   ),
                 ),

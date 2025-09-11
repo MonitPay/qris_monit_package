@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
 
 class QRISController extends MobileScannerController {
@@ -82,13 +82,6 @@ class QRISController extends MobileScannerController {
   Future<BarcodeCapture?> _processImage(String filePath) async {
     // Analyze the image to detect any barcodes.
     BarcodeCapture? barcodeCapture = await analyzeImage(filePath);
-
-    // Print the detected barcodes to the debug console.
-    debugPrint(
-        'barcodeCapture ===== ${barcodeCapture?.barcodes.first.rawValue}');
-    debugPrint('barcodeCapture ===== ${barcodeCapture?.barcodes.first.type}');
-    debugPrint('barcodeCapture ===== ${barcodeCapture?.barcodes.first.format}');
-
     // Add the detected barcodes to the `barcodes` stream.
     addBarcode(barcodeCapture);
 

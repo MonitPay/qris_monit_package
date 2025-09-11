@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 
 class ScannerAnimation extends AnimatedWidget {
-  final Size? animationSize;
-
   const ScannerAnimation({
-    super.key,
     required Animation<double> animation,
     this.animationSize,
+    super.key,
   }) : super(listenable: animation);
+  final Size? animationSize;
 
   @override
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable as Animation<double>;
     final scorePosition =
-        (animation.value * (MediaQuery.of(context).size.height * .9));
+        animation.value * (MediaQuery.of(context).size.height * .9);
 
     // Color colorCC = Color(0xCC78b5ff);
     // Color colorAA = Color(0xAA78b5ff);
@@ -47,29 +46,30 @@ class ScannerAnimation extends AnimatedWidget {
               height: 5,
               width: 5,
               decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                // ignore: prefer_const_literals_to_create_immutables
-                stops: [
-                  0.0,
-                  0.2,
-                  0.4,
-                  0.6,
-                  0.8,
-                  // 1,
-                  // 1.2,
-                ],
-                colors: [
-                  // colorCC,
-                  // colorAA,
-                  color88,
-                  color66,
-                  color44,
-                  color22,
-                  color00
-                ],
-              )),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  // ignore: prefer_const_literals_to_create_immutables
+                  stops: [
+                    0.0,
+                    0.2,
+                    0.4,
+                    0.6,
+                    0.8,
+                    // 1,
+                    // 1.2,
+                  ],
+                  colors: [
+                    // colorCC,
+                    // colorAA,
+                    color88,
+                    color66,
+                    color44,
+                    color22,
+                    color00,
+                  ],
+                ),
+              ),
             );
           },
         ),

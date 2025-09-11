@@ -23,7 +23,17 @@ class _ScannerScreenState extends State<ScannerScreen> {
       body: QRISScanner(
         qrisController: qrisController,
         onScanCompleted: (rawData, qrisData, qrisError) async {
-          qrisController.stop();
+          if (qrisError != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(qrisError.message ?? 'Unknown error'),
+                backgroundColor: Colors.red,
+              ),
+            );
+            return;
+          }
+
+          qrisController.pause();
           showAdaptiveDialog(
             context: context,
             barrierDismissible: false,
@@ -44,7 +54,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   TextButton(
                     onPressed: () {
                       Navigator.of(dialogContext).pop();
-                      qrisController.stop();
+                      qrisController.start();
                     },
                     child: const Text('OK'),
                   ),
@@ -53,11 +63,11 @@ class _ScannerScreenState extends State<ScannerScreen> {
             },
           );
         },
-        errorBuilder: (_, error, __) {
+        errorBuilder: (_, error) {
           return Center(
             child: Container(
               color: Colors.white,
-              child: Text('${error.errorDetails?.message}'),
+              child: Text(error.errorCode.message),
             ),
           );
         },
