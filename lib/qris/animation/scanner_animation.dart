@@ -14,66 +14,70 @@ class ScannerAnimation extends AnimatedWidget {
     final scorePosition =
         animation.value * (MediaQuery.of(context).size.height * .9);
 
-    // Color colorCC = Color(0xCC78b5ff);
-    // Color colorAA = Color(0xAA78b5ff);
-    Color color88 = const Color(0x8878b5ff);
-    Color color66 = const Color(0x6678b5ff);
-    Color color44 = const Color(0x4478b5ff);
-    Color color22 = const Color(0x223A8EF4);
-    Color color00 = const Color(0x003A8EF4);
-
-    if (animation.status == AnimationStatus.reverse) {
-      color88 = const Color(0x003A8EF4);
-      color66 = const Color(0x223A8EF4);
-      color44 = const Color(0x4478b5ff);
-      color22 = const Color(0x6678b5ff);
-      color00 = const Color(0x8878b5ff);
-      // color22 = Color(0xAA78b5ff);
-      // color00 = Color(0xCC78b5ff);
-    }
     return Positioned(
       bottom: scorePosition,
       child: SizedBox(
         height:
             animationSize?.height ?? MediaQuery.of(context).size.width * .25,
         width: animationSize?.width ?? MediaQuery.of(context).size.width,
-        child: ListView.builder(
-          itemCount: 100,
-          scrollDirection: Axis.horizontal,
-          itemBuilder: (BuildContext buildContext, int index) {
-            return Container(
-              margin: const EdgeInsets.all(1),
-              height: 5,
-              width: 5,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  // ignore: prefer_const_literals_to_create_immutables
-                  stops: [
-                    0.0,
-                    0.2,
-                    0.4,
-                    0.6,
-                    0.8,
-                    // 1,
-                    // 1.2,
-                  ],
-                  colors: [
-                    // colorCC,
-                    // colorAA,
-                    color88,
-                    color66,
-                    color44,
-                    color22,
-                    color00,
-                  ],
-                ),
-              ),
-            );
-          },
+        child: CustomPaint(
+          painter: ScannerPainter(
+            animationStatus: animation.status,
+          ),
+          size: Size(
+            animationSize?.width ?? MediaQuery.of(context).size.width,
+            animationSize?.height ?? MediaQuery.of(context).size.width * .25,
+          ),
         ),
       ),
     );
+  }
+}
+
+class ScannerPainter extends CustomPainter {
+  const ScannerPainter({
+    required this.animationStatus,
+  });
+
+  final AnimationStatus animationStatus;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Define colors based on animation direction
+    List<Color> colors;
+    if (animationStatus == AnimationStatus.reverse) {
+      colors = const [
+        Color(0x003A8EF4),
+        Color(0x223A8EF4),
+        Color(0x4478b5ff),
+        Color(0x6678b5ff),
+        Color(0x8878b5ff),
+      ];
+    } else {
+      colors = const [
+        Color(0x8878b5ff),
+        Color(0x6678b5ff),
+        Color(0x4478b5ff),
+        Color(0x223A8EF4),
+        Color(0x003A8EF4),
+      ];
+    }
+
+    // Create gradient paint
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        stops: const [0.0, 0.2, 0.4, 0.6, 0.8],
+        colors: colors,
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    // Draw the gradient rectangle covering the entire area
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+  }
+
+  @override
+  bool shouldRepaint(ScannerPainter oldDelegate) {
+    return oldDelegate.animationStatus != animationStatus;
   }
 }

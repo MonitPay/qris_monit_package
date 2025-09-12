@@ -1,4 +1,4 @@
-// export 'package:image_picker/image_picker.dart';
+export 'package:image_picker/image_picker.dart';
 export 'package:mobile_scanner/mobile_scanner.dart';
 export 'package:qris/qris.dart';
 

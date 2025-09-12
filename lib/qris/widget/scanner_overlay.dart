@@ -33,12 +33,12 @@ class ScannerOverlay extends StatelessWidget {
         if (frontCanvasBuilder != null)
           ...frontCanvasBuilder!(qrisData)
         else
-          _defaultFrontCanvasBuilder(),
+          _defaultFrontCanvasBuilder(context),
       ],
     );
   }
 
-  Widget _defaultFrontCanvasBuilder() {
+  Widget _defaultFrontCanvasBuilder(BuildContext context) {
     return Positioned(
       left: 0.0,
       right: 0.0,
@@ -99,7 +99,9 @@ class ScannerOverlay extends StatelessWidget {
                         color: Colors.black,
                       ),
                       iconSize: 24.0,
-                      onPressed: qrisController.scanFromGallery,
+                      onPressed: () {
+                        _openGallery(context);
+                      },
                     ),
                   ),
                 ),
@@ -108,6 +110,22 @@ class ScannerOverlay extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _openGallery(BuildContext context) async {
+    await qrisController.scanFromGallery().onError(
+      (e, s) {
+        debugPrint('No QR code found in the selected image');
+        debugPrint('Error: $e');
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      },
     );
   }
 }

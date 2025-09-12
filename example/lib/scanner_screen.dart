@@ -20,6 +20,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('QRIS Scanner Example'),
+        centerTitle: true,
+      ),
       body: QRISScanner(
         qrisController: qrisController,
         onScanCompleted: (rawData, qrisData, qrisError) async {

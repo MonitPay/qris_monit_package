@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:image_picker/image_picker.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
 
 class QRISController extends MobileScannerController {
@@ -52,14 +51,14 @@ class QRISController extends MobileScannerController {
   ///
   /// @return A `Future` that completes with a `BarcodeCapture` object representing the detected
   ///         barcodes, or `null` if no image is selected or no barcodes are detected.
-  Future<BarcodeCapture?> scanFromGallery() async {
+  Future<void> scanFromGallery() async {
     return ImagePicker()
         .pickImage(
       source: ImageSource.gallery,
       imageQuality: 100,
     )
         .then((imageFile) async {
-      if (imageFile == null) return null;
+      if (imageFile == null) return;
       return await _processImage(imageFile.path);
     });
   }
@@ -79,12 +78,22 @@ class QRISController extends MobileScannerController {
   /// @param filePath The file path to the image to be processed.
   /// @return A `Future` that completes when the image has been processed and the
   ///         detected barcodes have been added to the `barcodes` stream.
-  Future<BarcodeCapture?> _processImage(String filePath) async {
+  Future<void> _processImage(String filePath) async {
     // Analyze the image to detect any barcodes.
-    BarcodeCapture? barcodeCapture = await analyzeImage(filePath);
-    // Add the detected barcodes to the `barcodes` stream.
-    addBarcode(barcodeCapture);
+    try {
+      BarcodeCapture? barcodeCapture = await analyzeImage(filePath);
 
-    return barcodeCapture;
+      if (barcodeCapture == null || barcodeCapture.barcodes.isEmpty) {
+        return Future.error(
+          QRISError('not_a_barcode', message: 'Unable to read QR code'),
+        );
+      }
+
+      addBarcode(barcodeCapture);
+    } on Exception catch (e) {
+      return Future.error(
+        QRISError('not_a_barcode', message: 'Unable to read QR code: $e'),
+      );
+    }
   }
 }

@@ -49,14 +49,16 @@ class _QRISScannerState extends State<QRISScanner>
     with SingleTickerProviderStateMixin {
   ///instance of [MobileScannerController]
   ///for controlling QR scanner camera
-  late QRISController qrisController = widget.qrisController;
+  late final QRISController _qrisController = widget.qrisController;
+
+  late final QRISOnScanCompleted _onScanCompleted = widget.onScanCompleted;
 
   ///instance of [QRIS]
   ///
   /// return null if qr is not scanned
   ///
   /// return parsed qr code data
-  QRIS? qrisData;
+  QRIS? _qrisData;
 
   late AnimationController _animationController;
 
@@ -85,7 +87,7 @@ class _QRISScannerState extends State<QRISScanner>
     // Dispose the animation controller when the widget is disposed.
     _animationController.dispose();
     // Dispose the controller when the widget is disposed.
-    qrisController.dispose();
+    _qrisController.dispose();
 
     super.dispose();
   }
@@ -101,7 +103,7 @@ class _QRISScannerState extends State<QRISScanner>
   @override
   Widget build(BuildContext context) {
     return MobileScanner(
-      controller: qrisController,
+      controller: _qrisController,
       errorBuilder: (ctx, error) {
         return widget.errorBuilder != null
             ? widget.errorBuilder!(ctx, error)
@@ -113,16 +115,16 @@ class _QRISScannerState extends State<QRISScanner>
               );
       },
       overlayBuilder: (_, __) => ScannerOverlay(
-        qrisController: qrisController,
+        qrisController: _qrisController,
         frontCanvasBuilder: widget.frontCanvasBuilder,
         isFlashButtonEnabled: widget.isFlashButtonEnabled,
         isGalleryButtonEnabled: widget.isGalleryButtonEnabled,
         animationSize: widget.animationSize,
-        qrisData: qrisData,
+        qrisData: _qrisData,
         animationController: _animationController,
       ),
       onDetectError: (error, stackTrace) {
-        widget.onScanCompleted(
+        _onScanCompleted(
           null,
           null,
           QRISError(
@@ -132,36 +134,26 @@ class _QRISScannerState extends State<QRISScanner>
         );
       },
       onDetect: (BarcodeCapture barcodes) {
-        if (barcodes.barcodes.isNotEmpty) {
-          if (barcodes.barcodes.first.rawValue != null) {
-            debugPrint(
-              'Barcode Raw Value ===== ${barcodes.barcodes.first.rawValue}',
-            );
-
-            try {
-              qrisData = QRIS(barcodes.barcodes.first.rawValue ?? '');
-              widget.onScanCompleted(
-                barcodes.barcodes.first.rawValue,
-                qrisData,
-                null,
-              );
-              setState(() {});
-            } on QRISError catch (e) {
-              widget.onScanCompleted(barcodes.barcodes.first.rawValue, null, e);
-            }
-          } else {
-            widget.onScanCompleted(
-              null,
-              null,
-              QRISError('not_a_barcode', message: 'Unable to read QR code'),
-            );
-          }
-        } else {
-          widget.onScanCompleted(
+        // Early return for empty barcodes or null rawValue
+        if (barcodes.barcodes.isEmpty ||
+            barcodes.barcodes.first.rawValue == null) {
+          _onScanCompleted(
             null,
             null,
             QRISError('not_a_barcode', message: 'Unable to read QR code'),
           );
+          return;
+        }
+
+        final rawValue = barcodes.barcodes.first.rawValue!;
+        debugPrint('Barcode Raw Value ===== $rawValue');
+
+        try {
+          _qrisData = QRIS(rawValue);
+          _onScanCompleted(rawValue, _qrisData, null);
+          setState(() {});
+        } on QRISError catch (e) {
+          _onScanCompleted(rawValue, null, e);
         }
       },
     );
