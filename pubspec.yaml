@@ -17,7 +17,8 @@ dependencies:
   mobile_scanner:
     git:
       url: https://github.com/dwikyhardi/mobile_scanner
-      ref: 5f466516a8b7f779cdef2082cad4237f9bc287fa
+      # Upstream develop plus the QRIS gallery-stream API (MONIT-1862).
+      ref: c7e0210400f997dfa30454078ec41cfb85aa45ad
   qris: ^0.7.1
 
 dev_dependencies:

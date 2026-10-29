@@ -284,11 +284,11 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: "5f466516a8b7f779cdef2082cad4237f9bc287fa"
-      resolved-ref: "5f466516a8b7f779cdef2082cad4237f9bc287fa"
+      ref: c7e0210400f997dfa30454078ec41cfb85aa45ad
+      resolved-ref: c7e0210400f997dfa30454078ec41cfb85aa45ad
       url: "https://github.com/dwikyhardi/mobile_scanner"
     source: git
-    version: "7.0.1"
+    version: "7.4.2"
   path:
     dependency: transitive
     description:
