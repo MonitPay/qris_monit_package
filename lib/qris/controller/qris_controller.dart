@@ -53,14 +53,11 @@ class QRISController extends MobileScannerController {
   ///         barcodes, or `null` if no image is selected or no barcodes are detected.
   Future<void> scanFromGallery() async {
     return ImagePicker()
-        .pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 100,
-    )
+        .pickImage(source: ImageSource.gallery, imageQuality: 100)
         .then((imageFile) async {
-      if (imageFile == null) return;
-      return await _processImage(imageFile.path);
-    });
+          if (imageFile == null) return;
+          return await _processImage(imageFile.path);
+        });
   }
 
   /// Processes an image to detect any barcodes present.
@@ -84,9 +81,7 @@ class QRISController extends MobileScannerController {
       BarcodeCapture? barcodeCapture = await analyzeImage(filePath);
 
       if (barcodeCapture == null || barcodeCapture.barcodes.isEmpty) {
-        return Future.error(
-          QRISError('not_a_barcode', message: 'Unable to read QR code'),
-        );
+        throw QRISError('not_a_barcode', message: 'Unable to read QR code');
       }
 
       addBarcode(barcodeCapture);

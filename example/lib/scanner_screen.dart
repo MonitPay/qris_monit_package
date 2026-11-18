@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
 
 class ScannerScreen extends StatefulWidget {
@@ -51,7 +51,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
                     Text('Merchant City: ${qrisData?.merchantCity}'),
                     Text('Transaction Amount: ${qrisData?.transactionAmount}'),
                     Text(
-                        'Transaction Currency: ${qrisData?.transactionCurrency}'),
+                      'Transaction Currency: ${qrisData?.transactionCurrency}',
+                    ),
                   ],
                 ),
                 actions: [

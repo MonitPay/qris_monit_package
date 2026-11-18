@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
 
 ///The parent widget is [Stack]
@@ -114,7 +114,7 @@ class _QRISScannerState extends State<QRISScanner>
                 ),
               );
       },
-      overlayBuilder: (_, __) => ScannerOverlay(
+      overlayBuilder: (_, _) => ScannerOverlay(
         qrisController: _qrisController,
         frontCanvasBuilder: widget.frontCanvasBuilder,
         isFlashButtonEnabled: widget.isFlashButtonEnabled,
@@ -127,10 +127,7 @@ class _QRISScannerState extends State<QRISScanner>
         _onScanCompleted(
           null,
           null,
-          QRISError(
-            'not_a_barcode',
-            message: 'Unable to read QR code: $error',
-          ),
+          QRISError('not_a_barcode', message: 'Unable to read QR code: $error'),
         );
       },
       onDetect: (BarcodeCapture barcodes) {

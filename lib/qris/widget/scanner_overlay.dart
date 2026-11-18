@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:qris_monit_package/qris/animation/scanner_animation.dart';
 import 'package:qris_monit_package/qris_monit_package.dart';
 
@@ -60,14 +60,22 @@ class ScannerOverlay extends StatelessWidget {
                         valueListenable: qrisController,
                         builder: (context, state, child) {
                           return switch (state.torchState) {
-                            TorchState.off =>
-                              const Icon(Icons.flash_off, color: Colors.black),
-                            TorchState.on =>
-                              const Icon(Icons.flash_on, color: Colors.yellow),
-                            TorchState.auto =>
-                              const Icon(Icons.flash_off, color: Colors.black),
-                            TorchState.unavailable =>
-                              const Icon(Icons.flash_off, color: Colors.black),
+                            TorchState.off => const Icon(
+                              Icons.flash_off,
+                              color: Colors.black,
+                            ),
+                            TorchState.on => const Icon(
+                              Icons.flash_on,
+                              color: Colors.yellow,
+                            ),
+                            TorchState.auto => const Icon(
+                              Icons.flash_off,
+                              color: Colors.black,
+                            ),
+                            TorchState.unavailable => const Icon(
+                              Icons.flash_off,
+                              color: Colors.black,
+                            ),
                           };
                         },
                       ),
@@ -114,18 +122,13 @@ class ScannerOverlay extends StatelessWidget {
   }
 
   Future<void> _openGallery(BuildContext context) async {
-    await qrisController.scanFromGallery().onError(
-      (e, s) {
-        debugPrint('No QR code found in the selected image');
-        debugPrint('Error: $e');
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      },
-    );
+    await qrisController.scanFromGallery().onError((e, s) {
+      debugPrint('No QR code found in the selected image');
+      debugPrint('Error: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
+    });
   }
 }

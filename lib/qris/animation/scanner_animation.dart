@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class ScannerAnimation extends AnimatedWidget {
   const ScannerAnimation({
@@ -21,9 +21,7 @@ class ScannerAnimation extends AnimatedWidget {
             animationSize?.height ?? MediaQuery.of(context).size.width * .25,
         width: animationSize?.width ?? MediaQuery.of(context).size.width,
         child: CustomPaint(
-          painter: ScannerPainter(
-            animationStatus: animation.status,
-          ),
+          painter: ScannerPainter(animationStatus: animation.status),
           size: Size(
             animationSize?.width ?? MediaQuery.of(context).size.width,
             animationSize?.height ?? MediaQuery.of(context).size.width * .25,
@@ -35,9 +33,7 @@ class ScannerAnimation extends AnimatedWidget {
 }
 
 class ScannerPainter extends CustomPainter {
-  const ScannerPainter({
-    required this.animationStatus,
-  });
+  const ScannerPainter({required this.animationStatus});
 
   final AnimationStatus animationStatus;
 
